@@ -1,5 +1,5 @@
 # TypeScript Online Bootcamp @とらゼミ
-とらゼミ内でのTypeScript講座を受講しました。
+とらゼミ内でのTypeScript講座を受講しました。<br>
 https://github.com/deatiger/ts-hotel-demo
 
 ## 概要
@@ -11,17 +11,17 @@ https://github.com/deatiger/ts-hotel-demo
 ```
 yarn add axios
 ```
-APIを叩く際にaxiosを使う
+→APIを叩く際にaxiosを使う
 
 ```
 yarn add --dev @types/axios node-sass@4.14.1
 ```
-axiosの型定義ファイルと、sassを使うためのライブラリ
-node-sassの最新版はreactに対応していないためverを下げてインストール
+axiosの型定義ファイルと、sassを使うためのライブラリ<br>
+node-sassの最新版はreactに対応していないためverを下げてインストール<br><br>
 
-**補足**
-yarn devなし→本番用デプロイでも必要なもの
-yarn devあり→本番にデプロイするとき不要なもの
+**補足**<br>
+- yarn devなし→本番用デプロイでも必要なもの
+- yarn devあり→本番にデプロイするとき不要なもの<br>
 （型定義ファイルやsassは開発環境でしか必要無い。)
 
 ## 設定ファイル修正
@@ -30,13 +30,65 @@ yarn devあり→本番にデプロイするとき不要なもの
 "baseUrl": "./src",
 ```
 
+## コンポーネントのpropsに型をつける
+
+```tsx
+mport React, {ChangeEvent, FC} from 'react'
+import styles from 'styles/atoms/form.module.scss'
+
+interface Props {
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+  value: string | number
+  type: string 
+}
+
+const TextInput: FC<Props> = ({ onChange, value, type }) => {
+  return (
+    <input 
+      className={styles.form__text}
+      onChange={(e) => onChange(e)}
+      value={value}
+      type={type}
+    />
+  )
+}
+
+export default TextInput
+```
+
 ## ジェネリクスを用いたカスタムフック
 
+```tsx
+import {ChangeEvent, Dispatch, SetStateAction, useCallback } from 'react';
+type UseChangeEvent<T> = {
+  (update: Dispatch<SetStateAction<T>>): (event: ChangeEvent<HTMLInputElement>) => void
+}
 
+// Dispatch<SetStateAction<<T>> は useStateのset○○の型情報である。
 
+export const useStringChangeEvent: UseChangeEvent<string> = (update) => {
+  return useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    update(event.target.value)
+  }, [update])
+}
+
+export const useNumberChangeEvent: UseChangeEvent<number> = (update) => {
+  return useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    if(/^[0-9]+$/.test(event.target.value)){
+      update(Number(event.target.value))
+    }
+  }, [update])
+}
+
+```
 
 # エラー集
 
 ## react-jsxでエラーになる
-以下を.vscode/setting.jsonに追加後、エディタリロード
-https://www.it-swarm-ja.tech/ja/reactjs/%E3%80%8Cjsx%E3%80%8D%E3%83%95%E3%83%A9%E3%82%B0%E3%81%8C%E6%8C%87%E5%AE%9A%E3%81%95%E3%82%8C%E3%81%A6%E3%81%84%E3%81%AA%E3%81%84%E9%99%90%E3%82%8A%E3%80%81jsx%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%9B%E3%82%93/838744128/
+package.jsonのバージョンを下げる
+
+```package.json
+"typescript": "~4.0.3",
+```
+
+上記修正後、`npm install`or`yarn`実行で直った。
